@@ -38,6 +38,12 @@ Route::group([
 });
 
 Route::group([
+    'prefix' => 'mentor'
+], function () {
+    Route::post('/create', [MentorController::class, 'create']);
+});
+
+Route::group([
     'prefix' => 'course'
 ], function () {
     Route::post('/create', [CourseController::class, 'create']);

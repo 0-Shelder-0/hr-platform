@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Course;
+use App\Models\Mentor;
 use App\Models\User;
 use App\Models\UserCourse;
 
@@ -24,12 +25,13 @@ class CourseController extends Controller
         $description = request('description');
         $study_direction_id = request('study_direction_id');
         $user = auth()->user();
+        $mentor = Mentor::where('user_id', $user->id)->first();
 
         $course = new Course();
         $course->title = $title;
         $course->description = $description;
         $course->study_direction_id = $study_direction_id;
-        $course->mentor_id = $user->id;
+        $course->mentor_id = $mentor->id;
         $course->save();
 
         return response()->json(['message' => 'Course have been added with id ' . $course->id]);

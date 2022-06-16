@@ -1,120 +1,107 @@
 const baseApiUrl = 'http://localhost:8000/api'
 const jsonMimeType = 'application/json'
 
-const name = 'test10'
-const email = 'test10@example.ru'
+const name = 'test30'
+const email = 'test30@example.ru'
 const password = 'test'
 const getIdRegex = /\d+/
 
-let token = null
+let token
 let studyDirectionId = null
 let courseId = null
 
-
-fetch(baseApiUrl + '/auth/register', {
-    method: 'POST',
-    headers: new Headers({
-        Accept: jsonMimeType
-    }),
-    body: JSON.stringify({
-        name: name,
-        email: email,
-        password: password
+async function login() {
+    data = await fetch(baseApiUrl + `/auth/login?email=${email}&password=${password}`, {
+        method: 'POST',
+        headers: new Headers({
+            Accept: jsonMimeType,
+        }),
     })
-})
-    .then(result => result.json())
-    .then((data) => {
-        console.log(data);
-        token = data.token;
-    })
+    data = await data.json()
+    token = data.access_token
 
-if (token == null) {
-    console.log('JWT token is null!')
+    if (token == null) {
+        console.log('JWT token is null!')
+    }
 }
 
 
-fetch(baseApiUrl + '/auth/logout', {
+let data = await fetch(baseApiUrl + `/auth/register?name=${name}&email=${email}&password=${password}`, {
+    method: 'POST',
+    headers: new Headers({
+        Accept: jsonMimeType,
+    }),
+})
+data = await data.json()
+console.log(data);
+
+
+await login()
+
+
+data = await fetch(baseApiUrl + '/auth/logout', {
     method: 'POST',
     headers: new Headers({
         Accept: jsonMimeType,
         Authorization: "Bearer " + token
     })
 })
-    .then((data) => data.json())
-    .then((msg) => console.log(msg.message))
+data = await data.json()
+console.log(data.message)
 
 
-fetch(baseApiUrl + '/auth/login', {
-    method: 'POST',
-    headers: new Headers({
-        Accept: jsonMimeType
-    }),
-    body: JSON.stringify({
-        email: email,
-        password: password
-    })
-})
-    .then((response) => response.json())
-    .then((data) => {
-        token = data.token
-        console.log(data)
-    })
+await login()
 
 
-fetch(baseApiUrl + '/study-direction/create', {
+data = await fetch(baseApiUrl + '/study-direction/create?name=Backend', {
     method: 'POST',
     headers: new Headers({
         Accept: jsonMimeType,
         Authorization: "Bearer " + token
     }),
-    body: JSON.stringify({
-        name: 'Backend',
-    })
 })
-    .then((response) => response.json())
-    .then(msg => {
-        console.log(msg.message);
+data = await data.json()
+console.log(data.message);
 
-        let match = getIdRegex.exec(msg.message);
-        if (match.length === 1) {
-            studyDirectionId = match[0];
-        }
-    })
+let match = getIdRegex.exec(data.message);
+if (match.length === 1) {
+    studyDirectionId = match[0];
+}
 
 
-fetch(baseApiUrl + '/course/create', {
+data = await fetch(baseApiUrl + '/mentor/create', {
     method: 'POST',
     headers: new Headers({
         Accept: jsonMimeType,
         Authorization: "Bearer " + token
     }),
-    body: JSON.stringify({
-        title: 'Course-1',
-        description: 'Course description...',
-        study_direction_id: studyDirectionId,
-    })
 })
-    .then((response) => response.json())
-    .then(msg => {
-        console.log(msg.message);
-
-        let match = getIdRegex.exec(msg.message);
-        if (match.length === 1) {
-            courseId = match[0];
-        }
-    })
+data = await data.json()
+console.log(data.message);
 
 
-fetch(baseApiUrl + '/course/set-user', {
+data = await fetch(baseApiUrl + `/course/create?title=Course-1&description=Course+description...&study_direction_id=${studyDirectionId}`, {
     method: 'POST',
     headers: new Headers({
         Accept: jsonMimeType,
         Authorization: "Bearer " + token
     }),
-    body: JSON.stringify({
-        user_id: 1,
-        course_id: courseId,
-    })
 })
-    .then((response) => response.json())
-    .then(msg => console.log(msg.message))
+data = await data.json()
+console.log(data.message);
+
+match = getIdRegex.exec(data.message);
+if (match.length === 1) {
+    courseId = match[0];
+}
+
+
+data = await fetch(baseApiUrl + `/course/set-user?user_id=1&course_id=${courseId}`, {
+    method: 'POST',
+    headers: new Headers({
+        Accept: jsonMimeType,
+        Authorization: "Bearer " + token
+    }),
+})
+data = await data.json()
+console.log(data.message)
